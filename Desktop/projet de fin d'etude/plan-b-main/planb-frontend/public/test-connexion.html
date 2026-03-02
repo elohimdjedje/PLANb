@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de connexion - Plan B</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .test-item {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        .test-title {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .status {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ffd700;
+            animation: pulse 1.5s infinite;
+        }
+        .status.success {
+            background: #4ade80;
+            animation: none;
+        }
+        .status.error {
+            background: #ef4444;
+            animation: none;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            font-size: 14px;
+            word-wrap: break-word;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #ff6b35;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Test de connexion Plan B</h1>
+        
+        <div class="test-item">
+            <div class="test-title">
+                <span class="status" id="status1"></span>
+                Test 1 : Frontend accessible
+            </div>
+            <div class="result" id="result1">En attente...</div>
+        </div>
+
+        <div class="test-item">
+            <div class="test-title">
+                <span class="status" id="status2"></span>
+                Test 2 : Backend API
+            </div>
+            <div class="result" id="result2">En attente...</div>
+        </div>
+
+        <div class="test-item">
+            <div class="test-title">
+                <span class="status" id="status3"></span>
+                Test 3 : Récupération des annonces
+            </div>
+            <div class="result" id="result3">En attente...</div>
+        </div>
+
+        <button onclick="runTests()">🔄 Relancer les tests</button>
+
+        <div class="info">
+            <strong>📍 Configuration actuelle :</strong><br>
+            IP : <span id="current-ip">192.168.1.176</span><br>
+            Frontend : <span id="frontend-url">http://192.168.1.176:5173</span><br>
+            Backend : <span id="backend-url">http://192.168.1.176:8000/api/v1</span>
+        </div>
+    </div>
+
+    <script>
+        const BACKEND_URL = 'http://192.168.1.176:8000/api/v1';
+
+        function updateStatus(testId, status, message) {
+            const statusEl = document.getElementById(`status${testId}`);
+            const resultEl = document.getElementById(`result${testId}`);
+            
+            statusEl.className = 'status ' + status;
+            resultEl.textContent = message;
+        }
+
+        async function runTests() {
+            // Test 1 : Frontend
+            updateStatus(1, 'loading', 'Test en cours...');
+            try {
+                updateStatus(1, 'success', '✅ Frontend chargé avec succès !');
+            } catch (err) {
+                updateStatus(1, 'error', '❌ Erreur : ' + err.message);
+            }
+
+            // Test 2 : Backend API
+            updateStatus(2, 'loading', 'Test en cours...');
+            try {
+                const response = await fetch(`${BACKEND_URL}/listings`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    updateStatus(2, 'success', `✅ Backend accessible ! (Status: ${response.status})`);
+                } else {
+                    updateStatus(2, 'error', `❌ Erreur ${response.status}: ${response.statusText}`);
+                }
+            } catch (err) {
+                updateStatus(2, 'error', '❌ Impossible de joindre le backend : ' + err.message);
+            }
+
+            // Test 3 : Récupération des annonces
+            updateStatus(3, 'loading', 'Test en cours...');
+            try {
+                const response = await fetch(`${BACKEND_URL}/listings`);
+                const data = await response.json();
+                
+                if (data.data && data.data.length > 0) {
+                    updateStatus(3, 'success', `✅ ${data.data.length} annonce(s) trouvée(s) !`);
+                } else {
+                    updateStatus(3, 'error', '⚠️ Aucune annonce trouvée');
+                }
+            } catch (err) {
+                updateStatus(3, 'error', '❌ Erreur : ' + err.message);
+            }
+        }
+
+        // Lancer les tests au chargement
+        window.onload = runTests;
+    </script>
+</body>
+</html>

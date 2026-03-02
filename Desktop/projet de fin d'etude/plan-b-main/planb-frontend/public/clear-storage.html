@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nettoyage LocalStorage - Plan B</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #FF6B35 0%, #FF8C61 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            color: #FF6B35;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        p {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .storage-info {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .storage-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .storage-item:last-child {
+            border-bottom: none;
+        }
+        
+        .storage-key {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .storage-value {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-clear {
+            background: #FF6B35;
+            color: white;
+        }
+        
+        .btn-clear:hover {
+            background: #FF5520;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
+        }
+        
+        .btn-refresh {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .btn-refresh:hover {
+            background: #e0e0e0;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .success-message.show {
+            display: block;
+            animation: slideIn 0.3s;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .link a {
+            color: #FF6B35;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Nettoyage LocalStorage</h1>
+        <p>Cette page vous permet de supprimer toutes les données stockées localement (comptes de démo, favoris, etc.)</p>
+        
+        <div class="storage-info" id="storageInfo">
+            <!-- Sera rempli par JavaScript -->
+        </div>
+        
+        <div class="button-group">
+            <button class="btn-clear" onclick="clearStorage()">Nettoyer tout</button>
+            <button class="btn-refresh" onclick="refresh()">Actualiser</button>
+        </div>
+        
+        <div class="success-message" id="successMessage">
+            ✅ LocalStorage nettoyé avec succès !
+        </div>
+        
+        <div class="link">
+            <a href="/">← Retour à l'accueil</a>
+        </div>
+    </div>
+    
+    <script>
+        function displayStorage() {
+            const storageInfo = document.getElementById('storageInfo');
+            const items = [];
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                items.push({ key, value });
+            }
+            
+            if (items.length === 0) {
+                storageInfo.innerHTML = '<div class="empty-state">Aucune donnée stockée</div>';
+            } else {
+                storageInfo.innerHTML = items.map(item => `
+                    <div class="storage-item">
+                        <span class="storage-key">${item.key}</span>
+                        <span class="storage-value">${item.value.substring(0, 30)}${item.value.length > 30 ? '...' : ''}</span>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        function clearStorage() {
+            if (confirm('Êtes-vous sûr de vouloir supprimer toutes les données stockées localement ?')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                // Afficher le message de succès
+                const successMessage = document.getElementById('successMessage');
+                successMessage.classList.add('show');
+                
+                // Actualiser l'affichage
+                displayStorage();
+                
+                // Masquer le message après 3 secondes
+                setTimeout(() => {
+                    successMessage.classList.remove('show');
+                }, 3000);
+            }
+        }
+        
+        function refresh() {
+            displayStorage();
+        }
+        
+        // Afficher au chargement
+        displayStorage();
+    </script>
+</body>
+</html>

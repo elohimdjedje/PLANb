@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "Plan B",
+    "slug": "planb-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": false,
+    "splash": {
+      "backgroundColor": "#FF6B35"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.planb.mobile"
+    },
+    "android": {
+      "package": "com.planb.mobile"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "planb-mobile"
+      }
+    },
+    "plugins": [
+      "expo-asset",
+      "expo-font"
+    ]
+  }
+}

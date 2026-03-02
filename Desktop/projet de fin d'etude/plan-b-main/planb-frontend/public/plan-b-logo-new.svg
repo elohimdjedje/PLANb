@@ -1,0 +1,90 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+  <defs>
+    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F4621F;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF8C42;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="greyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#C0C0C0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#808080;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Fond blanc -->
+  <circle cx="100" cy="100" r="98" fill="white" stroke="#f0f0f0" stroke-width="2"/>
+  
+  <!-- Arc orange supérieur -->
+  <path d="M 50 70 A 60 60 0 0 1 150 70" fill="none" stroke="url(#orangeGrad)" stroke-width="12" stroke-linecap="round"/>
+  
+  <!-- Arc gris inférieur -->
+  <path d="M 140 140 A 50 50 0 0 1 60 140 Q 100 160 100 160 Q 100 160 140 140" fill="url(#greyGrad)" opacity="0.8"/>
+  
+  <!-- Bande bleu marine ondulée -->
+  <path d="M 50 100 Q 70 90 90 100 T 130 100 T 170 100" fill="none" stroke="#1A3C6E" stroke-width="8" stroke-linecap="round"/>
+  
+  <!-- Voiture (gauche) -->
+  <g transform="translate(35, 95)">
+    <!-- Corps de la voiture -->
+    <rect x="0" y="8" width="20" height="8" rx="2" fill="#1A3C6E"/>
+    <!-- Toit -->
+    <rect x="4" y="3" width="12" height="6" rx="1" fill="#1A3C6E"/>
+    <!-- Roues -->
+    <circle cx="4" cy="17" r="2" fill="#1A3C6E"/>
+    <circle cx="16" cy="17" r="2" fill="#1A3C6E"/>
+    <!-- Fenêtre -->
+    <rect x="5" y="4" width="3" height="4" fill="#87CEEB"/>
+  </g>
+  
+  <!-- Panier/Shopping (gauche-bas) -->
+  <g transform="translate(42, 105)">
+    <rect x="1" y="2" width="10" height="8" rx="1" fill="none" stroke="#F4621F" stroke-width="1"/>
+    <circle cx="3" cy="0" r="1" fill="#F4621F"/>
+    <circle cx="9" cy="0" r="1" fill="#F4621F"/>
+    <line x1="2" y1="4" x2="10" y2="4" stroke="#F4621F" stroke-width="0.5"/>
+  </g>
+  
+  <!-- Maisons (centre) -->
+  <!-- Maison 1 (arrière, plus grande, bleu) -->
+  <g transform="translate(70, 85)">
+    <polygon points="0,12 8,2 16,12" fill="#1A3C6E"/>
+    <rect x="2" y="6" width="12" height="8" fill="#1A3C6E" opacity="0.7"/>
+    <!-- Fenêtres -->
+    <rect x="4" y="8" width="2" height="2" fill="#E8E8E8"/>
+    <rect x="10" y="8" width="2" height="2" fill="#E8E8E8"/>
+    <!-- Porte -->
+    <rect x="7" y="11" width="2" height="3" fill="#8B4513"/>
+  </g>
+  
+  <!-- Maison 2 (avant, plus petite, gris) -->
+  <g transform="translate(85, 92)">
+    <polygon points="0,10 6,2 12,10" fill="#808080"/>
+    <rect x="1" y="5" width="10" height="7" fill="#A9A9A9"/>
+    <!-- Fenêtres -->
+    <rect x="3" y="7" width="1.5" height="1.5" fill="#E8E8E8"/>
+    <rect x="7.5" y="7" width="1.5" height="1.5" fill="#E8E8E8"/>
+    <!-- Porte -->
+    <rect x="5" y="10" width="1.5" height="2" fill="#8B4513"/>
+  </g>
+  
+  <!-- Clé (centre-droit) -->
+  <g transform="translate(102, 88)">
+    <!-- Tige de la clé -->
+    <rect x="0" y="2" width="10" height="2" rx="1" fill="#1A3C6E"/>
+    <!-- Anneau de la clé -->
+    <circle cx="11" cy="3" r="2.5" fill="none" stroke="#1A3C6E" stroke-width="1.5"/>
+    <!-- Dents de la clé -->
+    <rect x="1" y="4" width="1.5" height="1.5" fill="#1A3C6E"/>
+    <rect x="4" y="4" width="1.5" height="1.5" fill="#1A3C6E"/>
+  </g>
+  
+  <!-- Symbole Dollar (droite) -->
+  <g transform="translate(120, 85)">
+    <!-- Cercle fond -->
+    <circle cx="5" cy="5" r="5" fill="#F5A623"/>
+    <!-- Dollar -->
+    <text x="5" y="8" font-size="8" font-weight="bold" fill="white" text-anchor="middle">$</text>
+  </g>
+  
+  <!-- Texte Plan-B (bas, optionnel) -->
+  <text x="100" y="175" font-family="Syne, sans-serif" font-size="12" font-weight="700" fill="#1A3C6E" text-anchor="middle" letter-spacing="-0.5">PLAN-B</text>
+</svg>
