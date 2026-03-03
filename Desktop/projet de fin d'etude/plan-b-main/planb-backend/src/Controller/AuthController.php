@@ -617,11 +617,18 @@ class AuthController extends AbstractController
 
             // Envoyer l'email de bienvenue avec le lien de vérification
             $welcomeEmailSent = false;
+            error_log("=== DEBUG EMAIL ===");
+            error_log("EmailService null? " . ($this->emailService === null ? 'OUI' : 'NON'));
             if ($this->emailService !== null) {
+                error_log("EmailService->isConfigured()? " . ($this->emailService->isConfigured() ? 'OUI' : 'NON'));
                 try {
                     // Éviter le transport null://null (ne livre rien)
                     if ($this->emailService->isConfigured()) {
+                        error_log("Tentative envoi email à: " . $user->getEmail());
                         $welcomeEmailSent = $this->emailService->sendWelcomeEmail($user, $verificationToken);
+                        error_log("Résultat envoi: " . ($welcomeEmailSent ? 'SUCCÈS' : 'ÉCHEC'));
+                    } else {
+                        error_log("MAILER non configuré - email non envoyé");
                     }
                 } catch (\Exception $e) {
                     // Logger l'erreur mais ne pas faire échouer l'inscription

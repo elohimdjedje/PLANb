@@ -184,14 +184,6 @@ function TwoFactorVerifyPage() {
                     </p>
                 </div>
 
-                {/* Dev OTP hint */}
-                {devOtp && (
-                    <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-800 text-sm text-center">
-                        <span className="font-semibold block mb-1">Mode developpement</span>
-                        Code OTP : <strong className="text-blue-900 tracking-widest text-lg">{devOtp}</strong>
-                    </div>
-                )}
-
                 {/* Timer */}
                 <div className="text-center mb-6">
                     {timeLeft > 0 ? (

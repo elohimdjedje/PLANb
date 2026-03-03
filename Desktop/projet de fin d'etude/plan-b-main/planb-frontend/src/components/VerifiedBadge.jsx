@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import { ShieldCheck } from 'lucide-react';
 
 const BADGE_INFO = {
     identity_verified: { label: 'Identité vérifiée' },
@@ -6,6 +7,18 @@ const BADGE_INFO = {
     vehicule_certified: { label: 'Vendeur auto certifié' },
     hotel_certified: { label: 'Établissement certifié' },
     manual_certified: { label: 'Certifié par l\'admin' },
+};
+
+// Mapping des catégories vers les labels
+const CATEGORY_LABELS = {
+    auto: 'Auto',
+    immobilier: 'Immobilier',
+    emploi: 'Emploi',
+    services: 'Services',
+    electronique: 'Électronique',
+    mode: 'Mode',
+    maison: 'Maison',
+    loisirs: 'Loisirs',
 };
 
 /**
@@ -61,7 +74,12 @@ export const VerifiedBadge = ({ isVerified, badges = [], size = 'sm', className 
     const title = badgeInfo?.label || 'Utilisateur vérifié par Plan B';
 
     return (
-        <span title={title} aria-label={title} className={`inline-block ${className}`}>
+        <span 
+            title={title} 
+            aria-label={title} 
+            className={`inline-flex items-center flex-shrink-0 ${className}`}
+            style={{ lineHeight: 0 }}
+        >
             <TwitterBadgeSVG px={sizePx} />
         </span>
     );
@@ -108,6 +126,48 @@ VerifiedBadge.propTypes = {
     badges: PropTypes.arrayOf(PropTypes.string),
     size: PropTypes.oneOf(['xs', 'sm', 'md', 'lg', 'xl']),
     className: PropTypes.string,
+};
+
+/**
+ * Badge contextuel : "Vendeur vérifié pour cette catégorie"
+ * Option 2 du système de vérification par scope
+ */
+export const CategoryCertifiedBadge = ({ isCertified, category, size = 'sm', showLabel = true }) => {
+    if (!isCertified) return null;
+
+    const sizeClasses = {
+        xs: 'text-xs px-1.5 py-0.5',
+        sm: 'text-xs px-2 py-1',
+        md: 'text-sm px-2.5 py-1',
+        lg: 'text-sm px-3 py-1.5',
+    };
+
+    const iconSizes = {
+        xs: 'w-3 h-3',
+        sm: 'w-3.5 h-3.5',
+        md: 'w-4 h-4',
+        lg: 'w-5 h-5',
+    };
+
+    const categoryLabel = CATEGORY_LABELS[category?.toLowerCase()] || category;
+    const title = `Vendeur vérifié pour ${categoryLabel}`;
+
+    return (
+        <span
+            title={title}
+            className={`inline-flex items-center gap-1 bg-green-50 text-green-700 border border-green-200 rounded-full font-medium ${sizeClasses[size] || sizeClasses.sm}`}
+        >
+            <ShieldCheck className={iconSizes[size] || iconSizes.sm} />
+            {showLabel && <span>Vérifié {categoryLabel}</span>}
+        </span>
+    );
+};
+
+CategoryCertifiedBadge.propTypes = {
+    isCertified: PropTypes.bool.isRequired,
+    category: PropTypes.string,
+    size: PropTypes.oneOf(['xs', 'sm', 'md', 'lg']),
+    showLabel: PropTypes.bool,
 };
 
 export default VerifiedBadge;

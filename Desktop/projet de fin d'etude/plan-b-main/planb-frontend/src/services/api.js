@@ -1390,6 +1390,189 @@ export const verificationService = {
     },
 };
 
+// ==================== SCOPE VERIFICATION (certification par domaine) ====================
+export const scopeVerificationService = {
+    /**
+     * Récupère les exigences de vérification pour une catégorie
+     * @param {string} category - Catégorie principale (vehicules, immobilier, etc.)
+     * @param {string} subcategory - Sous-catégorie optionnelle
+     * @returns {Promise<{ok: boolean, data: object}>}
+     */
+    async getCategoryRequirements(category, subcategory = null) {
+        try {
+            const params = subcategory ? { subcategory } : {};
+            const response = await api.get(`/categories/${category}/requirements`, { params });
+            return { ok: true, data: response.data };
+        } catch (error) {
+            return { ok: false, data: error.response?.data || { error: error.message } };
+        }
+    },
+
+    /**
+     * Récupère toutes les certifications de l'utilisateur connecté
+     * @returns {Promise<{ok: boolean, data: object}>}
+     */
+    async getMyScopes() {
+        try {
+            const response = await api.get('/verifications/my-scopes');
+            return { ok: true, data: response.data };
+        } catch (error) {
+            return { ok: false, data: error.response?.data || { error: error.message } };
+        }
+    },
+
+    /**
+     * Upload un document de vérification
+     * @param {File} file - Fichier à uploader
+     * @param {string} docType - Type de document (CNI, PERMIS, KBIS, etc.)
+     * @returns {Promise<{ok: boolean, data: object}>}
+     */
+    async uploadDocument(file, docType) {
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('docType', docType);
+            const response = await api.post('/verifications/documents', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            return { ok: true, data: response.data };
+        } catch (error) {
+            return { ok: false, data: error.response?.data || { error: error.message } };
+        }
+    },
+
+    /**
+     * Soumet une demande de vérification pour un scope
+     * @param {string} scopeKey - Clé du scope (AUTO, IMMOBILIER/AGENCE, etc.)
+     * @param {number[]} documentIds - IDs des documents à associer
+     * @returns {Promise<{ok: boolean, data: object}>}
+     */
+    async submitForScope(scopeKey, documentIds = []) {
+        try {
+            const response = await api.post(`/verifications/${scopeKey}/submit`, { documentIds });
+            return { ok: true, data: response.data };
+        } catch (error) {
+            return { ok: false, data: error.response?.data || { error: error.message } };
+        }
+    },
+
+    /**
+     * Récupère le statut de vérification pour un scope
+     * @param {string} scopeKey - Clé du scope
+     * @returns {Promise<{ok: boolean, data: object}>}
+     */
+    async getScopeStatus(scopeKey) {
+        try {
+            const response = await api.get(`/verifications/${scopeKey}/status`);
+            return { ok: true, data: response.data };
+        } catch (error) {
+            return { ok: false, data: error.response?.data || { error: error.message } };
+        }
+    },
+
+    /**
+     * Récupère les documents de l'utilisateur
+     * @returns {Promise<{ok: boolean, data: object}>}
+     */
+    async getMyDocuments() {
+        try {
+            const response = await api.get('/verifications/my-documents');
+            return { ok: true, data: response.data };
+        } catch (error) {
+            return { ok: false, data: error.response?.data || { error: error.message } };
+        }
+    },
+
+    /**
+     * Vérifie si l'utilisateur peut publier dans une catégorie
+     * @param {string} category - Catégorie principale
+     * @param {string} subcategory - Sous-catégorie optionnelle
+     * @returns {Promise<{ok: boolean, data: object}>}
+     */
+    async canPublishInCategory(category, subcategory = null) {
+        try {
+            const params = subcategory ? { subcategory } : {};
+            const response = await api.get(`/categories/${category}/can-publish`, { params });
+            return { ok: true, data: response.data };
+        } catch (error) {
+            return { ok: false, data: error.response?.data || { error: error.message } };
+        }
+    },
+
+    // ==================== Admin endpoints ====================
+
+    /**
+     * Récupère les demandes de vérification en attente (admin)
+     * @returns {Promise<{ok: boolean, data: object}>}
+     */
+    async adminGetPendingScopes() {
+        try {
+            const response = await api.get('/admin/verifications/pending');
+            return { ok: true, data: response.data };
+        } catch (error) {
+            return { ok: false, data: error.response?.data || { error: error.message } };
+        }
+    },
+
+    /**
+     * Récupère les statistiques des demandes de vérification (admin)
+     * @returns {Promise<{ok: boolean, data: object}>}
+     */
+    async adminGetStats() {
+        try {
+            const response = await api.get('/admin/verifications/stats');
+            return { ok: true, data: response.data };
+        } catch (error) {
+            return { ok: false, data: error.response?.data || { error: error.message } };
+        }
+    },
+
+    /**
+     * Approuve une demande de vérification de scope (admin)
+     * @param {number} verificationId - ID de la vérification
+     * @returns {Promise<{ok: boolean, data: object}>}
+     */
+    async adminApproveScope(verificationId) {
+        try {
+            const response = await api.post(`/admin/verifications/${verificationId}/approve`);
+            return { ok: true, data: response.data };
+        } catch (error) {
+            return { ok: false, data: error.response?.data || { error: error.message } };
+        }
+    },
+
+    /**
+     * Rejette une demande de vérification de scope (admin)
+     * @param {number} verificationId - ID de la vérification
+     * @param {string} reason - Raison du rejet
+     * @param {number[]} rejectedDocumentIds - IDs des documents rejetés
+     * @returns {Promise<{ok: boolean, data: object}>}
+     */
+    async adminRejectScope(verificationId, reason) {
+        try {
+            const response = await api.post(`/admin/verifications/${verificationId}/reject`, { reason });
+            return { ok: true, data: response.data };
+        } catch (error) {
+            return { ok: false, data: error.response?.data || { error: error.message } };
+        }
+    },
+
+    /**
+     * Révoque une certification de scope (admin)
+     * @param {number} verificationId - ID de la vérification
+     * @param {string} reason - Raison de la révocation
+     * @returns {Promise<{ok: boolean, data: object}>}
+     */
+    async adminRevokeScope(verificationId, reason) {
+        try {
+            const response = await api.post(`/admin/scope-verifications/${verificationId}/revoke`, { reason });
+            return { ok: true, data: response.data };
+        } catch (error) {
+            return { ok: false, data: error.response?.data || { error: error.message } };
+        }
+    },
+};
+
 // Export Axios instance for custom requests
 export { api };
 

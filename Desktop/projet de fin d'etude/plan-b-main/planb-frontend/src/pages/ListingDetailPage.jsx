@@ -46,8 +46,8 @@ function AuthPromptModal({ onClose, onLogin }) {
     );
 }
 import { formatPrice, countryCodeToName, getImageUrl } from '../utils/helpers';
-import { VerifiedBadge, StarRating } from '../components';
-import { messageService, reviewService, favoriteService, visitSlotService } from '../services/api';
+import { VerifiedBadge, StarRating, CategoryCertifiedBadge } from '../components';
+import { messageService, reviewService, favoriteService, visitSlotService, bookingService } from '../services/api';
 
 function ListingDetailPage() {
     const { id } = useParams();
@@ -71,6 +71,13 @@ function ListingDetailPage() {
     const [reviewRating, setReviewRating] = useState(5);
     const [reviewComment, setReviewComment] = useState('');
     const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+
+    // État pour la réservation avec dates (locations)
+    const [showBookingModal, setShowBookingModal] = useState(false);
+    const [bookingStartDate, setBookingStartDate] = useState('');
+    const [bookingEndDate, setBookingEndDate] = useState('');
+    const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
+    const [bookingError, setBookingError] = useState('');
 
     useEffect(() => {
         const fetchListing = async () => {
@@ -203,6 +210,63 @@ function ListingDetailPage() {
             alert("Une erreur est survenue lors de l'envoi de l'avis.");
         } finally {
             setIsSubmittingReview(false);
+        }
+    };
+
+    // Détection si c'est une location (louer/location)
+    const isRentalListing = (() => {
+        if (!listing) return false;
+        // Vérifier le priceUnit (jour, semaine, mois)
+        const rentalUnits = ['jour', 'semaine', 'mois', 'heure', 'nuit'];
+        if (listing.priceUnit && rentalUnits.includes(listing.priceUnit.toLowerCase())) return true;
+        // Vérifier la subcategory
+        const subcatLower = (listing.subcategory || '').toLowerCase();
+        if (subcatLower.includes('louer') || subcatLower.includes('location')) return true;
+        // Vérifier le titre/description
+        const titleLower = (listing.title || '').toLowerCase();
+        if (titleLower.includes('à louer') || titleLower.includes('location')) return true;
+        return false;
+    })();
+
+    // Handler pour soumettre une réservation avec dates
+    const handleSubmitBooking = async (e) => {
+        e.preventDefault();
+        setBookingError('');
+
+        if (!currentUser) {
+            navigate('/login', { state: { from: `/annonces/${id}` } });
+            return;
+        }
+
+        if (!bookingStartDate || !bookingEndDate) {
+            setBookingError('Veuillez sélectionner les dates de début et de fin');
+            return;
+        }
+
+        const start = new Date(bookingStartDate);
+        const end = new Date(bookingEndDate);
+        if (end <= start) {
+            setBookingError('La date de fin doit être après la date de début');
+            return;
+        }
+
+        setIsSubmittingBooking(true);
+        try {
+            const result = await bookingService.create(listing.id, bookingStartDate, bookingEndDate);
+            if (result.ok) {
+                setShowBookingModal(false);
+                setBookingStartDate('');
+                setBookingEndDate('');
+                alert('Votre demande de réservation a été envoyée ! Le propriétaire va la confirmer.');
+                navigate('/mes-reservations');
+            } else {
+                setBookingError(result.data?.error || result.data?.message || 'Erreur lors de la réservation');
+            }
+        } catch (error) {
+            console.error('Error submitting booking:', error);
+            setBookingError('Une erreur est survenue');
+        } finally {
+            setIsSubmittingBooking(false);
         }
     };
 
@@ -398,13 +462,13 @@ function ListingDetailPage() {
                                     </span>
                                     <h1 className="text-2xl font-bold text-gray-900">{listing.title}</h1>
                                 </div>
-                                <div className="text-right">
-                                    <p className="text-2xl font-bold text-orange-500">
+                                <div className="text-right flex-shrink-0">
+                                    <p className="text-2xl font-bold text-orange-500 whitespace-nowrap">
                                         {formatPrice(listing.price)} FCFA
+                                        {listing.priceUnit && (
+                                            <span className="text-base font-normal text-gray-500 ml-0.5">/{listing.priceUnit}</span>
+                                        )}
                                     </p>
-                                    {listing.priceUnit && (
-                                        <p className="text-gray-500 text-sm">/{listing.priceUnit}</p>
-                                    )}
                                 </div>
                             </div>
                             <div className="flex items-center gap-4 text-gray-600">
@@ -679,24 +743,32 @@ function ListingDetailPage() {
                     <div className="lg:col-span-1">
                         {/* Seller Card */}
                         <div className="bg-white rounded-2xl p-6 sticky top-24">
-                            <div className="flex items-center gap-4 mb-6">
-                                <div className="w-14 h-14 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                            <div className="flex items-start gap-4 mb-6">
+                                <div className="w-14 h-14 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold text-xl flex-shrink-0 mt-0.5">
                                     {listing.user?.firstName?.charAt(0) || 'U'}
                                 </div>
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-2">
-                                        <p className="font-semibold text-gray-900">
+                                <div className="flex-1 min-w-0">
+                                    {/* Ligne 1: Nom + Badge vérifié alignés */}
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="font-semibold text-gray-900">
                                             {listing.user?.firstName} {listing.user?.lastName}
-                                        </p>
-                                        <VerifiedBadge isVerified={listing.user?.isVerified || false} badges={listing.user?.verificationBadges || []} size="md" />
-                                    </div>
-                                    {listing.user?.isPro && (
-                                        <span className="inline-flex items-center gap-1 text-xs text-orange-600">
-                                            <Star className="w-3 h-3 fill-current" /> Vendeur PRO
                                         </span>
-                                    )}
+                                        <VerifiedBadge isVerified={listing.user?.isVerified || false} badges={listing.user?.verificationBadges || []} size="md" />
+                                        {listing.user?.isPro && (
+                                            <span className="inline-flex items-center gap-1 text-xs text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full ml-1">
+                                                <Star className="w-3 h-3 fill-current" /> PRO
+                                            </span>
+                                        )}
+                                    </div>
+                                    {/* Ligne 2: Badge certifié catégorie */}
+                                    <CategoryCertifiedBadge 
+                                        isCertified={listing.user?.isCertifiedForCategory || false}
+                                        category={listing.category}
+                                        size="sm"
+                                    />
+                                    {/* Ligne 3: Note et avis */}
                                     {listing.user?.averageRating > 0 && (
-                                        <div className="mt-2">
+                                        <div className="mt-1">
                                             <StarRating
                                                 rating={listing.user.averageRating}
                                                 reviewsCount={listing.user.reviewsCount || 0}
@@ -763,6 +835,22 @@ function ListingDetailPage() {
                                         >
                                             <Shield className="w-5 h-5" />
                                             Payer la caution sécurisée
+                                        </button>
+                                    )}
+                                    {/* Réserver avec dates (locations uniquement) */}
+                                    {isRentalListing && (
+                                        <button
+                                            onClick={() => {
+                                                if (!currentUser) {
+                                                    navigate('/login', { state: { from: `/annonces/${id}` } });
+                                                } else {
+                                                    setShowBookingModal(true);
+                                                }
+                                            }}
+                                            className="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors"
+                                        >
+                                            <Calendar className="w-5 h-5" />
+                                            Réserver avec dates
                                         </button>
                                     )}
                                 </div>
@@ -845,6 +933,125 @@ function ListingDetailPage() {
                                 )}
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal de réservation avec dates (locations) */}
+            {showBookingModal && (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl w-full max-w-md p-6 relative">
+                        <button
+                            onClick={() => {
+                                setShowBookingModal(false);
+                                setBookingError('');
+                            }}
+                            className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
+                        >
+                            <X className="w-6 h-6" />
+                        </button>
+
+                        <div className="mb-6">
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Réserver avec dates</h3>
+                            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                <div className="w-10 h-10 bg-gray-200 rounded-lg overflow-hidden">
+                                    {listing && (
+                                        <img
+                                            src={typeof images[0] === 'string' ? images[0] : images[0]?.url || '/placeholder.jpg'}
+                                            alt=""
+                                            className="w-full h-full object-cover"
+                                        />
+                                    )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-medium text-gray-900 truncate">{listing?.title}</p>
+                                    <p className="text-sm text-orange-500 font-bold">
+                                        {formatPrice(listing?.price)} FCFA
+                                        {listing?.priceUnit && <span className="text-gray-500 font-normal"> /{listing.priceUnit}</span>}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form onSubmit={handleSubmitBooking} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Date de début
+                                </label>
+                                <input
+                                    type="date"
+                                    value={bookingStartDate}
+                                    onChange={(e) => setBookingStartDate(e.target.value)}
+                                    min={new Date().toISOString().split('T')[0]}
+                                    className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Date de fin
+                                </label>
+                                <input
+                                    type="date"
+                                    value={bookingEndDate}
+                                    onChange={(e) => setBookingEndDate(e.target.value)}
+                                    min={bookingStartDate || new Date().toISOString().split('T')[0]}
+                                    className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500"
+                                    required
+                                />
+                            </div>
+
+                            {/* Calcul du nombre de jours et prix estimé */}
+                            {bookingStartDate && bookingEndDate && new Date(bookingEndDate) > new Date(bookingStartDate) && (
+                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-blue-800">Durée :</span>
+                                        <span className="font-medium text-blue-900">
+                                            {Math.ceil((new Date(bookingEndDate) - new Date(bookingStartDate)) / (1000 * 60 * 60 * 24))} jour(s)
+                                        </span>
+                                    </div>
+                                    {listing?.priceUnit === 'jour' && (
+                                        <div className="flex justify-between text-sm mt-1">
+                                            <span className="text-blue-800">Prix estimé :</span>
+                                            <span className="font-bold text-blue-900">
+                                                {formatPrice(listing.price * Math.ceil((new Date(bookingEndDate) - new Date(bookingStartDate)) / (1000 * 60 * 60 * 24)))} FCFA
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {bookingError && (
+                                <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm">
+                                    {bookingError}
+                                </div>
+                            )}
+
+                            <button
+                                type="submit"
+                                disabled={isSubmittingBooking || !bookingStartDate || !bookingEndDate}
+                                className={`w-full py-3 bg-blue-600 text-white rounded-xl font-bold transition-colors flex items-center justify-center gap-2 ${
+                                    (isSubmittingBooking || !bookingStartDate || !bookingEndDate) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
+                                }`}
+                            >
+                                {isSubmittingBooking ? (
+                                    <>
+                                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        Envoi en cours...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Calendar className="w-5 h-5" />
+                                        Envoyer ma demande de réservation
+                                    </>
+                                )}
+                            </button>
+
+                            <p className="text-xs text-gray-500 text-center">
+                                Le propriétaire recevra votre demande et pourra l'accepter ou la refuser.
+                            </p>
+                        </form>
                     </div>
                 </div>
             )}

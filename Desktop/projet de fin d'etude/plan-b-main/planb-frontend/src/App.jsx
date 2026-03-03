@@ -85,6 +85,7 @@ const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
 const AdvancedSearchPage = lazy(() => import('./pages/AdvancedSearchPage'));
 const ListingStatsPage = lazy(() => import('./pages/ListingStatsPage'));
 const VerificationPage = lazy(() => import('./pages/VerificationPage'));
+const ScopeVerificationPage = lazy(() => import('./pages/ScopeVerificationPage'));
 const TwoFactorVerifyPage = lazy(() => import('./pages/TwoFactorVerifyPage'));
 const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
@@ -142,6 +143,7 @@ function AppContent() {
                     <Route path="/reset-password" element={<ResetPasswordPage />} />
                     <Route path="/search" element={<AdvancedSearchPage />} />
                     <Route path="/verification" element={<ProtectedRoute><VerificationPage /></ProtectedRoute>} />
+                    <Route path="/verification-scope/:scopeKey" element={<ProtectedRoute><ScopeVerificationPage /></ProtectedRoute>} />
                     <Route path="/listing/:id/stats" element={<ProtectedRoute><ListingStatsPage /></ProtectedRoute>} />
                     <Route path="/map" element={<MapPage />} />
                     <Route path="/admin" element={<AdminRoute><AdminPage /></AdminRoute>} />

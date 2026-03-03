@@ -17,6 +17,8 @@ function PublishPage() {
     const [images, setImages] = useState([]);
     const [showVerificationModal, setShowVerificationModal] = useState(false);
     const [verificationStatus, setVerificationStatus] = useState(null);
+    const [checkingScope, setCheckingScope] = useState(false);
+    const [scopeInfo, setScopeInfo] = useState(null);
 
     const [formData, setFormData] = useState({
         title: '',
@@ -351,9 +353,17 @@ function PublishPage() {
             const countryCode = countryCodeMap[formData.country] || 'CI';
 
             // 2. Structurer les données pour l'API
+            // Filtrer les "+ de cette annonce" (booléens true uniquement)
+            const selectedHighlights = {};
+            Object.entries(formData.characteristics).forEach(([key, value]) => {
+                if (value === true) {
+                    selectedHighlights[key] = true;
+                }
+            });
+
             const specifications = {
-                // Caractéristiques générales
-                ...formData.characteristics,
+                // Les + de cette annonce dans un sous-objet dédié
+                characteristics: Object.keys(selectedHighlights).length > 0 ? selectedHighlights : undefined,
                 // Champs spécifiques selon la catégorie
                 brand: formData.brand,
                 model: formData.model,
@@ -425,6 +435,13 @@ function PublishPage() {
 
                 navigate('/profile');
             } else {
+                // Vérifier si c'est une erreur de vérification de scope
+                if (result.data?.requiresVerification && result.data?.requiredScope) {
+                    // Rediriger vers la page de vérification de scope
+                    const returnUrl = encodeURIComponent(`/publish${editId ? `?edit=${editId}` : ''}`);
+                    navigate(`/verification-scope/${result.data.requiredScope}?returnTo=${returnUrl}`);
+                    return;
+                }
                 const errorMsg = result.data?.message || result.data?.error || 'Erreur lors de la publication';
                 console.error('Listing creation failed:', result);
                 setError(errorMsg);
@@ -437,7 +454,34 @@ function PublishPage() {
         }
     };
 
-    const nextStep = () => setStep(s => Math.min(s + 1, 4));
+    const nextStep = async () => {
+        // Si on passe de l'étape 1 (catégorie) à l'étape 2, vérifier le scope
+        if (step === 1 && formData.category) {
+            setCheckingScope(true);
+            setError('');
+            
+            try {
+                const { scopeVerificationService } = await import('../services/api.js');
+                const result = await scopeVerificationService.canPublishInCategory(formData.category, formData.subcategory || null);
+                
+                if (result.ok) {
+                    if (!result.data.canPublish) {
+                        // L'utilisateur n'est pas certifié pour cette catégorie
+                        setScopeInfo(result.data);
+                        const returnUrl = encodeURIComponent('/publish');
+                        navigate(`/verification-scope/${result.data.requiredScope}?returnTo=${returnUrl}`);
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.warn('Scope check failed, continuing anyway:', err);
+            } finally {
+                setCheckingScope(false);
+            }
+        }
+        
+        setStep(s => Math.min(s + 1, 4));
+    };
     const prevStep = () => setStep(s => Math.max(s - 1, 1));
 
     return (

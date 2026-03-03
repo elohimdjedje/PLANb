@@ -11,6 +11,7 @@ class ImageUploadService
     private ?string $cloudinaryApiKey;
     private ?string $cloudinaryApiSecret;
     private string $uploadDir;
+    private bool $cloudinaryEnabled;
 
     public function __construct(ParameterBagInterface $params)
     {
@@ -18,6 +19,14 @@ class ImageUploadService
         $this->cloudinaryCloudName = $_ENV['CLOUDINARY_CLOUD_NAME'] ?? null;
         $this->cloudinaryApiKey = $_ENV['CLOUDINARY_API_KEY'] ?? null;
         $this->cloudinaryApiSecret = $_ENV['CLOUDINARY_API_SECRET'] ?? null;
+
+        // Vérifier que les clés Cloudinary sont réellement configurées (pas des placeholders)
+        $this->cloudinaryEnabled = $this->cloudinaryCloudName 
+            && $this->cloudinaryApiKey 
+            && $this->cloudinaryApiSecret
+            && !str_contains($this->cloudinaryCloudName, 'votre_')
+            && !str_contains($this->cloudinaryApiKey, 'votre_')
+            && !str_contains($this->cloudinaryApiSecret, 'votre_');
 
         // Dossier local de fallback
         $this->uploadDir = $params->get('kernel.project_dir') . '/public/uploads/images';
@@ -40,8 +49,8 @@ class ImageUploadService
         // Validation du fichier
         $this->validateImage($file);
 
-        // Si Cloudinary est configuré, utiliser Cloudinary
-        if ($this->cloudinaryCloudName && $this->cloudinaryApiKey && $this->cloudinaryApiSecret) {
+        // Si Cloudinary est réellement configuré, utiliser Cloudinary
+        if ($this->cloudinaryEnabled) {
             return $this->uploadToCloudinary($file, $folder);
         }
 

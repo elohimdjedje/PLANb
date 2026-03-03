@@ -383,15 +383,36 @@ function AnnoncesPage() {
 
                     {/* Listings Grid */}
                     <div className="flex-1">
-                        <p className="text-gray-600 mb-6">{filteredListings.length} annonces trouvées</p>
+                        <p className="text-gray-600 mb-6">{isLoading ? 'Chargement...' : `${filteredListings.length} annonces trouvées`}</p>
 
-                        <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
-                            {filteredListings.map((listing) => (
-                                <ListingCard key={listing.id} listing={listing} />
-                            ))}
-                        </div>
+                        {/* Skeleton Loader */}
+                        {isLoading && (
+                            <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+                                {[...Array(6)].map((_, i) => (
+                                    <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden animate-pulse">
+                                        <div className="h-48 bg-gray-200"></div>
+                                        <div className="p-4 space-y-3">
+                                            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                                            <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                                            <div className="flex justify-between items-center pt-2">
+                                                <div className="h-5 bg-gray-200 rounded w-1/3"></div>
+                                                <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
 
-                        {filteredListings.length === 0 && (
+                        {!isLoading && (
+                            <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+                                {filteredListings.map((listing) => (
+                                    <ListingCard key={listing.id} listing={listing} />
+                                ))}
+                            </div>
+                        )}
+
+                        {!isLoading && filteredListings.length === 0 && (
                             <div className="text-center py-16">
                                 <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                                 <p className="text-gray-600 text-lg">Aucune annonce trouvée</p>

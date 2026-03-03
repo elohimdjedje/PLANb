@@ -1,53 +1,712 @@
-# 🚀 Plan B - Plateforme de Petites Annonces
+# PLANb - Plateforme de Gestion Immobilière
 
-Plateforme de petites annonces moderne pour l'Afrique de l'Ouest, inspirée de Le Bon Coin, avec paiement mobile (Wave, Orange Money) et interface WhatsApp.
+<div align="center">
+  <img src="./PlanB_Logo/logofinal.png" alt="PLANb Logo" width="200" height="200">
+  <p><strong>Une plateforme web et mobile complète pour la gestion et la location de biens immobiliers</strong></p>
+</div>
 
-![Status](https://img.shields.io/badge/status-en%20développement-yellow)
+![Status](https://img.shields.io/badge/status-production%20ready-brightgreen)
 ![PHP](https://img.shields.io/badge/PHP-8.2-blue)
-![React](https://img.shields.io/badge/React-19-61dafb)
-![Symfony](https://img.shields.io/badge/Symfony-7.0-black)
+![React](https://img.shields.io/badge/React-18-61dafb)
+![Node.js](https://img.shields.io/badge/Node.js-18-green)
+![Symfony](https://img.shields.io/badge/Symfony-7-black)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14-316192)
+![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
 
-## 📋 Sommaire
+## 📋 Table des matières
 
-- [Fonctionnalités](#-fonctionnalités)
-- [Technologies](#-technologies)
-- [Installation](#-installation)
-- [Configuration](#-configuration)
-- [Utilisation](#-utilisation)
-- [Documentation](#-documentation)
-
----
-
-## ✨ Fonctionnalités
-
-### Actuellement fonctionnel ✅
-- 🔐 **Authentification** : Inscription/Connexion avec JWT
-- 📝 **Publication d'annonces** : Avec images (jusqu'à 3 pour FREE, 10 pour PRO)
-- 🖼️ **Upload d'images** : Stockage local (prêt pour Cloudinary)
-- 👤 **Profil utilisateur** : Gestion des annonces, statistiques
-- ❤️ **Favoris** : Sauvegarde des annonces préférées
-- 💬 **Messagerie** : Intégration WhatsApp
-- 🔍 **Recherche** : Par catégorie, ville, prix
-- 📱 **Responsive** : Mobile-first design
-
-### En cours de développement 🚧
-- 💳 **Paiements** : Wave et Orange Money
-- ⭐ **Système PRO** : Abonnement payant
-- 📊 **Statistiques** : Dashboard pour compte PRO
-- 🔔 **Notifications** : Alertes favoris
+- [À propos](#à-propos)
+- [Caractéristiques](#caractéristiques)
+- [Architecture](#architecture)
+- [Prérequis](#prérequis)
+- [Installation](#installation)
+- [Démarrage rapide](#démarrage-rapide)
+- [Structure du projet](#structure-du-projet)
+- [Flux de travail Git](#flux-de-travail-git)
+- [Documentation technique](#documentation-technique)
+- [Contribution](#contribution)
+- [Support](#support)
 
 ---
 
-## 🛠 Technologies
+## À propos
 
-### Backend
-- **PHP 8.2** - Langage
-- **Symfony 7.0** - Framework
-- **PostgreSQL 15** - Base de données
-- **JWT** - Authentification
-- **API Platform** - API REST
+**PLANb** est une plateforme complète de gestion immobilière conçue pour simplifier la publication d'annonces, la gestion des propriétés et les transactions entre propriétaires et locataires. La plateforme offre une expérience utilisateur fluide sur web, mobile et desktop avec des services en temps réel.
+
+### Objectifs du projet
+- ✨ Interface utilisateur moderne et intuitive
+- 🔒 Système d'authentification sécurisé avec JWT
+- 📱 Application mobile native avec React Native
+- 💬 Communication en temps réel via WebSocket
+- 💳 Intégration de paiements multiples
+- 📊 Gestion avancée des annonces et contrats
+- 🔄 Workflow de modération et validation
+
+---
+
+## Caractéristiques
+
+### 👤 Utilisateurs
+- **Inscription et authentification** sécurisée
+- **Gestion de profil** avec documents et pièces d'identité
+- **Historique de transactions** et messages
+- **Notifications en temps réel**
+- **Système de notation** et avis
+
+### 🏠 Annonces immobilières
+- **Publication d'annonces** avec photos et vidéos
+- **Visite virtuelle 360°** via tour virtuel
+- **Filtrage avancé** par localisation, prix, commodités
+- **Gestion des favoris** et comparaison
+- **Modération** et vérification des annonces
+
+### 📋 Gestion des contrats
+- **Contrats de location** avec workflow de signature
+- **Contrats d'escrow** pour les transactions sécurisées
+- **Historique des modifications** et versioning
+- **E-signatures** intégrées
+- **Notifications d'étapes** automatiques
+
+### 💳 Paiements
+- **Intégration Stripe**
+- **Intégration Orange Money**
+- **Paiements sécurisés** et chiffrés
+- **Historique des transactions**
+- **Remboursements** automatiques
+
+### 🔔 Communication
+- **Chat en temps réel** avec WebSocket
+- **Notifications push** (web et mobile)
+- **Emails transactionnels** automatiques
+- **Système de messages** persistants
+
+---
+
+## Architecture
+
+### Infrastructure globale
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Frontend Web (Vite React)                │
+│              (planb-frontend)                                │
+│         localhost:5173 (développement)                      │
+└────────────────────────┬────────────────────────────────────┘
+                         │ API REST + WebSocket
+┌─────────────────────────────────────────────────────────────┐
+│                 Node.js Socket.IO Server                     │
+│            (planb-socketio-server)                          │
+│               localhost:3001                                 │
+└──────────────────────────────────────────────────────────────┘
+                         │ API REST
+┌─────────────────────────────────────────────────────────────┐
+│              Backend Symfony (PHP 8.2+)                      │
+│             (planb-backend)                                 │
+│         localhost:8000 (développement)                      │
+│         API REST + Traitement métier                        │
+└────────────────────────┬────────────────────────────────────┘
+                         │ SQL
+           ┌─────────────▼─────────────┐
+           │   PostgreSQL Database      │
+           │   (Port 5432)              │
+           └────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│           Application Mobile (React Native)                  │
+│              (planb-mobile)                                 │
+│         Accès via Expo ou APK compilée                      │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### Stack technologique
+
+| Composant | Technologie |
+|-----------|------------|
+| **Frontend** | React 18, Vite, Tailwind CSS, Leaflet.js |
+| **Backend** | Symfony 7, PHP 8.2+, Doctrine ORM |
+| **Base de données** | PostgreSQL 14+ |
+| **Real-time** | Node.js, Socket.IO |
+| **Mobile** | React Native, Expo |
+| **Authentification** | JWT (JsonWebToken) |
+| **Paiements** | Stripe API, Orange Money |
+| **Emails** | SwiftMailer, Templates |
+| **Tests** | PHPUnit, Vitest, Playwright |
+| **Déploiement** | Docker, Render.com, Netlify |
+
+---
+
+## Prérequis
+
+### Requis globaux
+- **Git** 2.30+
+- **Node.js** 18+ et **npm** 8+
+- **PHP** 8.2+ avec extensions: pgsql, curl, mbstring, json
+- **Composer** 2.0+
+- **PostgreSQL** 14+
+- **Docker** et **Docker Compose** (optionnel, pour environnement conteneurisé)
+
+### Vérification des prérequis
+
+```bash
+# Node.js
+node --version  # v18.x.x ou supérieur
+npm --version   # 8.x.x ou supérieur
+
+# PHP
+php --version   # 8.2.x ou supérieur
+composer --version  # 2.x.x
+
+# PostgreSQL
+psql --version  # 14 ou supérieur
+
+# Git
+git --version   # 2.30 ou supérieur
+```
+
+---
+
+## Installation
+
+### 1️⃣ Cloner le repository
+
+```bash
+git clone https://github.com/elohimdjedje/PLANb.git
+cd PLANb
+```
+
+### 2️⃣ Installation du Backend
+
+```bash
+cd planb-backend
+
+# Installer les dépendances PHP
+composer install
+
+# Créer le fichier .env
+cp .env.example .env
+
+# Configurer la base de données dans .env
+# DATABASE_URL=postgresql://user:password@localhost:5432/planb_db
+
+# Créer la base de données
+php bin/console doctrine:database:create
+
+# Exécuter les migrations
+php bin/console doctrine:migrations:migrate
+
+# Charger les données de test (optionnel)
+php bin/console doctrine:fixtures:load
+```
+
+### 3️⃣ Installation du Frontend
+
+```bash
+cd ../planb-frontend
+
+# Installer les dépendances
+npm install
+
+# Créer le fichier de configuration
+cp .env.example .env.local
+
+# Configuration :
+# VITE_API_URL=http://localhost:8000/api
+# VITE_SOCKET_URL=http://localhost:3001
+```
+
+### 4️⃣ Installation du serveur Socket.IO
+
+```bash
+cd ../planb-socketio-server
+
+# Installer les dépendances
+npm install
+
+# Créer la configuration
+cp .env.example .env
+
+# Configuration :
+# PORT=3001
+# API_URL=http://localhost:8000/api
+```
+
+### 5️⃣ Installation de l'application Mobile
+
+```bash
+cd ../planb-mobile
+
+# Installer les dépendances
+npm install
+
+# Créer la configuration
+cp .env.example .env
+
+# Configuration :
+# API_URL=http://YOUR_IP:8000/api
+# SOCKET_URL=http://YOUR_IP:3001
+```
+
+---
+
+## Démarrage rapide
+
+### Démarrage complet (tous les services)
+
+#### Avec Docker (Recommandé)
+
+```bash
+cd planb-backend
+docker-compose up -d
+```
+
+#### Manuellement (Windows PowerShell)
+
+**Terminal 1 - Backend Symfony**
+```powershell
+cd planb-backend
+php -S localhost:8000 -t public
+```
+
+**Terminal 2 - Socket.IO Server**
+```powershell
+cd planb-socketio-server
+npm start
+```
+
+**Terminal 3 - Frontend React**
+```powershell
+cd planb-frontend
+npm run dev
+```
+
+**Terminal 4 - Mobile (optionnel)**
+```powershell
+cd planb-mobile
+npm start  # ou: expo start
+```
+
+### Accès aux applications
+
+| Application | URL | Port |
+|------------|-----|------|
+| **Frontend** | http://localhost:5173 | 5173 |
+| **Backend API** | http://localhost:8000/api | 8000 |
+| **Socket.IO** | http://localhost:3001 | 3001 |
+| **Mobile** | Expo CLI / APK | - |
+| **PhpMyAdmin** | http://localhost:8080 | 8080 |
+
+### Compte de test
+
+```
+Email: admin@planb.local
+Mot de passe: admin123
+Rôle: administrateur
+```
+
+---
+
+## Structure du projet
+
+```
+PLANb/
+├── planb-backend/              # API Symfony
+│   ├── src/
+│   │   ├── Entity/            # Modèles de données
+│   │   ├── Controller/        # Contrôleurs API
+│   │   ├── Service/           # Logique métier
+│   │   ├── Repository/        # Accès aux données
+│   │   └── Security/          # JWT & authentification
+│   ├── migrations/            # Migrations BDD
+│   ├── tests/                 # Tests PHPUnit
+│   ├── config/                # Configuration Symfony
+│   └── composer.json
+│
+├── planb-frontend/             # Interface Web React
+│   ├── src/
+│   │   ├── pages/             # Pages React
+│   │   ├── components/        # Composants réutilisables
+│   │   ├── services/          # Services API
+│   │   ├── hooks/             # Hooks personnalisés
+│   │   ├── context/           # Context API
+│   │   └── styles/            # Styles Tailwind
+│   ├── tests/                 # Tests Vitest
+│   ├── e2e/                   # Tests E2E Playwright
+│   └── vite.config.js
+│
+├── planb-socketio-server/      # Serveur temps réel
+│   ├── server.js              # Point d'entrée
+│   ├── services/              # Services Socket.IO
+│   ├── middleware/            # Middlewares
+│   └── package.json
+│
+├── planb-mobile/               # App Mobile React Native
+│   ├── src/
+│   │   ├── screens/           # Écrans
+│   │   ├── components/        # Composants
+│   │   ├── services/          # Services API
+│   │   ├── navigation/        # Navigation
+│   │   └── context/           # Context
+│   ├── assets/                # Images et ressources
+│   └── app.json               # Configuration Expo
+│
+├── BD/                         # Fichiers base de données
+├── PlanB_Logo/                # Assets logo
+├── templates/                  # Templates emails
+├── database_full_export.sql    # Sauvegarde BDD
+└── README.md                   # Ce fichier
+```
+
+---
+
+## Flux de travail Git
+
+### Branches principales
+
+| Branche | Objectif | Protection |
+|---------|----------|-----------|
+| **main** | Production - Code stable et testé | ✅ PR requise |
+| **develop** | Intégration - Branche de développement | ⚠️ Recommandée |
+| **feature/** | Nouvelles fonctionnalités | ❌ Locale |
+| **bugfix/** | Corrections de bugs | ❌ Locale |
+| **hotfix/** | Corrections urgentes en production | ✅ PR requise |
+
+### Workflow recommandé
+
+#### 1. Créer une branche de fonctionnalité
+
+```bash
+# Depuis develop
+git checkout develop
+git pull origin develop
+
+# Créer la branche
+git checkout -b feature/nom-fonctionnalite
+
+# Exemple: git checkout -b feature/payment-integration
+```
+
+#### 2. Développer et commiter
+
+```bash
+# Effectuer les changements
+# ...
+
+# Staged les changements
+git add .
+
+# Commiter avec message descriptif
+git commit -m "feat: description de la fonctionnalité
+
+- Point 1
+- Point 2
+- Point 3"
+```
+
+#### 3. Pusher et créer une Pull Request
+
+```bash
+# Pusher la branche
+git push -u origin feature/nom-fonctionnalite
+
+# Aller sur GitHub et créer une PR
+# Assigner un reviewer
+# Attendre l'approbation
+```
+
+#### 4. Merger sur develop
+
+```bash
+# Une fois approuvée, merger depuis GitHub ou localement
+git checkout develop
+git pull origin develop
+git merge --no-ff feature/nom-fonctionnalite
+git push origin develop
+
+# Optionnel: supprimer la branche
+git push origin --delete feature/nom-fonctionnalite
+```
+
+#### 5. Release sur main
+
+```bash
+git checkout main
+git pull origin main
+git merge --no-ff develop -m "chore: release v1.x.x"
+git tag -a v1.x.x -m "Release version 1.x.x"
+git push origin main --tags
+```
+
+### Conventions de commits
+
+Utiliser le format **Conventional Commits** :
+
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+**Types:**
+- `feat:` Nouvelle fonctionnalité
+- `fix:` Correction de bug
+- `docs:` Documentation
+- `style:` Formatage (sans logique)
+- `refactor:` Refactorisation
+- `perf:` Amélioration de performance
+- `test:` Tests
+- `chore:` Tâches diverses
+
+**Exemples:**
+```
+feat(auth): implémenter l'authentification JWT
+fix(listings): corriger la pagination des annonces
+docs(readme): ajouter les instructions d'installation
+```
+
+---
+
+## Documentation technique
+
+### Endpoints API principales
+
+#### Authentification
+```
+POST   /api/auth/register       # Inscription
+POST   /api/auth/login          # Connexion
+POST   /api/auth/refresh        # Rafraîchir token JWT
+POST   /api/auth/logout         # Déconnexion
+```
+
+#### Utilisateurs
+```
+GET    /api/users/{id}          # Récupérer l'utilisateur
+PUT    /api/users/{id}          # Modifier le profil
+POST   /api/users/{id}/avatar   # Charger avatar
+GET    /api/users/{id}/history  # Historique des transactions
+```
+
+#### Annonces
+```
+GET    /api/listings            # Lister les annonces
+POST   /api/listings            # Créer une annonce
+GET    /api/listings/{id}       # Détails d'une annonce
+PUT    /api/listings/{id}       # Modifier une annonce
+DELETE /api/listings/{id}       # Supprimer une annonce
+POST   /api/listings/{id}/photos # Ajouter des photos
+```
+
+#### Contrats
+```
+GET    /api/contracts           # Lister les contrats
+POST   /api/contracts           # Créer un contrat
+GET    /api/contracts/{id}      # Détails du contrat
+PUT    /api/contracts/{id}      # Modifier le contrat
+POST   /api/contracts/{id}/sign # Signer electroniquement
+```
+
+#### Paiements
+```
+POST   /api/payments            # Créer un paiement
+GET    /api/payments/{id}       # Statut du paiement
+GET    /api/transactions        # Historique
+```
+
+### Variables d'environnement
+
+#### Backend (.env)
+```env
+APP_ENV=dev|prod
+APP_DEBUG=true|false
+DATABASE_URL=postgresql://user:password@localhost:5432/planb_db
+JWT_SECRET=votre_clé_secrète_jwt
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_PUBLIC_KEY=pk_test_...
+ORANGE_MONEY_KEY=...
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=587
+MAIL_USERNAME=...
+MAIL_PASSWORD=...
+SOCKET_IO_URL=http://localhost:3001
+```
+
+#### Frontend (.env.local)
+```env
+VITE_API_URL=http://localhost:8000/api
+VITE_SOCKET_URL=http://localhost:3001
+VITE_APP_NAME=PLANb
+```
+
+### Gestion des migrations BDD
+
+```bash
+# Créer une migration
+php bin/console make:migration
+
+# Voir les migrations
+php bin/console doctrine:migrations:list
+
+# Exécuter les migrations
+php bin/console doctrine:migrations:migrate
+
+# Revenir en arrière
+php bin/console doctrine:migrations:migrate prev
+```
+
+### Tests
+
+```bash
+# Backend - PHPUnit
+cd planb-backend
+./vendor/bin/phpunit
+
+# Frontend - Vitest
+cd planb-frontend
+npm run test
+
+# Frontend - E2E (Playwright)
+npm run test:e2e
+
+# Tous les tests
+npm run test:all
+```
+
+---
+
+## Contribution
+
+### Avant de contribuer
+
+1. ✅ Vérifiez les [issues](https://github.com/elohimdjedje/PLANb/issues) ouvertes
+2. 📋 Créez une issue pour discuter de votre idée
+3. 🍴 Forkez le repository
+4. 🌿 Créez une branche `feature/...`
+
+### Processus de contributon
+
+1. **Clonez votre fork**
+   ```bash
+   git clone https://github.com/VOTRE_USERNAME/PLANb.git
+   cd PLANb
+   git remote add upstream https://github.com/elohimdjedje/PLANb.git
+   ```
+
+2. **Synchronisez avec le dépôt principal**
+   ```bash
+   git fetch upstream
+   git checkout develop
+   git merge upstream/develop
+   ```
+
+3. **Créez une branche de fonctionnalité**
+   ```bash
+   git checkout -b feature/ma-fonctionnalite
+   ```
+
+4. **Committez vos changements**
+   ```bash
+   git commit -m "feat(scope): description claire"
+   ```
+
+5. **Poussez vers votre fork**
+   ```bash
+   git push origin feature/ma-fonctionnalite
+   ```
+
+6. **Créez une Pull Request**
+   - Donnez un titre descriptif
+   - Décrivez les changements
+   - Attachez les issues liées
+   - Demandez une review
+
+### Critères de qualité
+
+- ✅ Tous les tests passent
+- ✅ Code formaté (ESLint, PHP-CS-Fixer)
+- ✅ Pas de warnings/erreurs
+- ✅ Documentation mise à jour
+- ✅ Commits atomiques avec bons messages
+- ✅ Approuvé par au moins 1 reviewer
+
+---
+
+## Support
+
+### Documentation
+
+- 📖 [Architecture détaillée](./docs/ARCHITECTURE.md)
+- 💳 [Intégration paiements](./planb-backend/docs/PAYMENT_PROVIDERS.md)
+- 📧 [Configuration emails](./planb-backend/docs/EMAIL_CONFIGURATION.md)
+- 🔐 [Sécurité et authentification](./docs/SECURITY.md)
+- 📱 [Guide mobile](./planb-mobile/README.md)
+- 🔌 [Socket.IO real-time](./planb-socketio-server/README.md)
+
+### Problèmes courants
+
+**Port déjà utilisé**
+```bash
+# Trouver le processus
+netstat -ano | findstr :8000
+
+# Tuer le processus
+taskkill /PID <PID> /F
+```
+
+**Base de données non accessible**
+```bash
+# Vérifier PostgreSQL
+psql -U postgres -W
+
+# Vérifier les credentials dans .env
+# Recréer la base de données
+php bin/console doctrine:database:drop --force
+php bin/console doctrine:database:create
+php bin/console doctrine:migrations:migrate
+```
+
+**Module npm manquant**
+```bash
+npm install
+# ou
+npm ci  # pour ignorer les versions lock
+```
+
+### Contact et communauté
+
+- 👨‍💼 **Propriétaire du projet**: [elohimdjedje](https://github.com/elohimdjedje)
+- 📧 **Email**: contactelohi@gmail.com
+- 🐛 **Signaler un bug**: [Issues](https://github.com/elohimdjedje/PLANb/issues)
+- 💬 **Discussions**: [Discussions](https://github.com/elohimdjedje/PLANb/discussions)
+
+---
+
+## Licence
+
+Ce projet est sous licence [MIT](LICENSE) - voir le fichier LICENSE pour les détails.
+
+---
+
+## Remerciements
+
+- 🙏 Merci à tous les contributeurs
+- 🤝 Merci aux collaborateurs actifs
+- 🚀 Merci à la communauté open-source
+
+---
+
+<div align="center">
+  <p>Construit avec ❤️ pour simplifier la gestion immobilière</p>
+  <p><strong>PLANb - La plateforme immobilière du futur</strong></p>
+</div>
+
+---
+
+**Dernière mise à jour**: 2 mars 2026  
+**Version**: 1.0.0  
+**Statut**: Production Ready ✅
 
 ### Frontend
 - **React 19** - Framework UI

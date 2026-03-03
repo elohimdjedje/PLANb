@@ -88,13 +88,13 @@ function SellerProfilePage() {
                             {seller.firstName?.charAt(0) || 'U'}
                         </div>
                         <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                                <h1 className="text-2xl font-bold text-gray-900">
+                            <div className="flex items-center gap-1.5 mb-2">
+                                <span className="text-2xl font-bold text-gray-900">
                                     {seller.firstName} {seller.lastName}
-                                </h1>
+                                </span>
                                 <VerifiedBadge isVerified={seller.isVerified || false} badges={seller.verificationBadges || []} size="lg" />
                                 {seller.isPro && (
-                                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-orange-100 text-orange-600 text-sm font-medium rounded-full">
+                                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-orange-100 text-orange-600 text-sm font-medium rounded-full ml-1">
                                         <Star className="w-4 h-4 fill-current" /> PRO
                                     </span>
                                 )}
@@ -125,6 +125,14 @@ function SellerProfilePage() {
                                     Membre depuis {new Date(seller.createdAt).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
                                 </span>
                             </div>
+
+                            {/* Bio */}
+                            {seller.bio && (
+                                <div className="mt-4 p-4 bg-gray-50 rounded-xl">
+                                    <p className="text-gray-700 text-sm leading-relaxed">{seller.bio}</p>
+                                </div>
+                            )}
+
                             <div className="flex gap-3 mt-4">
                                 {seller.phone && (
                                     <a

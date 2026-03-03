@@ -10,6 +10,7 @@ use App\Repository\ListingViewRepository;
 use App\Repository\ReviewRepository;
 use App\Service\ViewCounterService;
 use App\Service\NotificationManagerService;
+use App\Service\ScopeVerificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -28,7 +29,8 @@ class ListingController extends AbstractController
         private ListingViewRepository $listingViewRepository,
         private ViewCounterService $viewCounterService,
         private ReviewRepository $reviewRepository,
-        private NotificationManagerService $notificationManager
+        private NotificationManagerService $notificationManager,
+        private ScopeVerificationService $scopeVerificationService
     ) {
     }
 
@@ -312,18 +314,31 @@ class ListingController extends AbstractController
             return $this->json(['error' => 'Non authentifié'], Response::HTTP_UNAUTHORIZED);
         }
 
-        // Vérifier que l'utilisateur est certifié avant de publier
-        if (!$user->canPublish()) {
+        $data = json_decode($request->getContent(), true);
+
+        // ====== VÉRIFICATION PAR SCOPE ======
+        // Vérifier que l'utilisateur est certifié pour la catégorie choisie
+        $category = $data['category'] ?? null;
+        $subcategory = $data['subcategory'] ?? null;
+        
+        $scopeCheck = $this->scopeVerificationService->canUserPublish($user, $category, $subcategory);
+        
+        if (!$scopeCheck['canPublish']) {
             return $this->json([
                 'error' => 'VERIFICATION_REQUIRED',
-                'message' => 'Vous devez vérifier votre identité avant de publier une annonce.',
-                'verificationStatus' => $user->getVerificationStatus(),
+                'message' => 'Vous devez être certifié pour publier dans cette catégorie.',
+                'requiresVerification' => true,
+                'requiredScope' => $scopeCheck['requiredScope'],
+                'scopeDisplayName' => $scopeCheck['scopeDisplayName'] ?? null,
+                'scopeIcon' => $scopeCheck['scopeIcon'] ?? null,
+                'verificationStatus' => $scopeCheck['status'],
+                'requiredDocs' => $scopeCheck['requiredDocs'] ?? [],
+                'missingDocs' => $scopeCheck['missingDocs'] ?? [],
+                'rejectionReason' => $scopeCheck['rejectionReason'] ?? null,
             ], Response::HTTP_FORBIDDEN);
         }
 
-        $data = json_decode($request->getContent(), true);
-
-        // Vérifier les limites FREE (4 annonces max)
+        // ====== LIMITE FREE (4 annonces max) ======
         if (!$user->isPro()) {
             $userListingsCount = count($user->getListings()->filter(fn($l) => $l->getStatus() === 'active'));
             
@@ -867,6 +882,12 @@ class ListingController extends AbstractController
                 'isPro' => $user->isPro(),
                 'isVerified' => $user->isIdentityVerified(),
                 'verificationBadges' => $user->getVerificationBadges() ?? [],
+                // Badge contextuel : certifié pour CETTE catégorie ?
+                'isCertifiedForCategory' => $this->scopeVerificationService->isUserCertifiedForCategory(
+                    $user,
+                    $listing->getCategory(),
+                    $listing->getSubcategory()
+                ),
                 'sellerScore' => $sellerScore,
                 // Stats cumulées du vendeur (pour l'en-tête des cartes)
                 'averageRating' => $sellerAverageRating > 0 ? $sellerAverageRating : null,

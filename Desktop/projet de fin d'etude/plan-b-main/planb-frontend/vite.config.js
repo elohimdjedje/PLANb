@@ -10,7 +10,7 @@ export default defineConfig({
     strictPort: true, // Erreur si port 3000 occupé (pas de port aléatoire)
     hmr: {
       host: 'localhost',
-      port: 3001,
+      port: 3002,
     },
     proxy: {
       // Proxifier les appels API vers le backend PHP

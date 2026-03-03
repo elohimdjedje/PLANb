@@ -2,9 +2,7 @@ doctrine:
     dbal:
         url: '%env(resolve:DATABASE_URL)%'
         profiling_collect_backtrace: '%kernel.debug%'
-        server_version: '8.0'
-        options:
-            1002: "SET SESSION sql_mode=''"
+        server_version: '15.0'
     orm:
         auto_generate_proxy_classes: true
         enable_lazy_ghost_objects: true
