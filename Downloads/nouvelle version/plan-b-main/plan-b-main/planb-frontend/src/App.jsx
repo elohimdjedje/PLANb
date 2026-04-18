@@ -74,7 +74,7 @@ const ProfileSettingsPage = lazy(() => import('./pages/ProfileSettingsPage'));
 const UpgradePage = lazy(() => import('./pages/UpgradePage'));
 const PublishPage = lazy(() => import('./pages/PublishPage'));
 const AuthPage = lazy(() => import('./pages/AuthPage'));
-// const MapPage = lazy(() => import('./pages/MapPage')); // Temporairement désactivé
+const MapPage = lazy(() => import('./pages/MapPage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
@@ -150,7 +150,7 @@ function AppContent() {
                     <Route path="/verification" element={<ProtectedRoute><VerificationPage /></ProtectedRoute>} />
                     <Route path="/verification-scope/:scopeKey" element={<ProtectedRoute><ScopeVerificationPage /></ProtectedRoute>} />
                     <Route path="/listing/:id/stats" element={<ProtectedRoute><ListingStatsPage /></ProtectedRoute>} />
-                    {/* <Route path="/map" element={<MapPage />} /> */} {/* Temporairement désactivé */}
+                    <Route path="/map" element={<MapPage />} />
                     <Route path="/admin" element={<AdminRoute><AdminPage /></AdminRoute>} />
                     <Route path="/about" element={<AboutPage />} />
                     <Route path="/contact" element={<ContactPage />} />

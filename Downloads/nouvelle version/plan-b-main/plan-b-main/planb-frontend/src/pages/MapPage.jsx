@@ -118,6 +118,7 @@ function FlyTo({ coords, zoom = 13 }) {
     return null;
 }
 
+
 // ── Composant principal ───────────────────────────────────────────────
 function MapPage() {
     const navigate = useNavigate();
@@ -126,11 +127,11 @@ function MapPage() {
     const [filter, setFilter] = useState('');
     const [searchText, setSearchText] = useState('');
     const [isLoading, setIsLoading] = useState(true);
-    const [sidebarOpen, setSidebarOpen] = useState(true); // État pour ouvrir/fermer le panneau
+    const [sidebarOpen, setSidebarOpen] = useState(true);
 
     // "Autour de moi"
-    const [userPos, setUserPos] = useState(null); // [lat, lng]
-    const [nearRadius, setNearRadius] = useState(50);   // km
+    const [userPos, setUserPos] = useState(null);
+    const [nearRadius, setNearRadius] = useState(50);
     const [nearActive, setNearActive] = useState(false);
     const [geoLoading, setGeoLoading] = useState(false);
 
@@ -145,13 +146,11 @@ function MapPage() {
         })();
     }, []);
 
-    // Annonces avec coords
     const mapped = useMemo(() =>
         allListings.map(l => ({ ...l, _coords: getCoords(l) })).filter(l => l._coords),
         [allListings]
     );
 
-    // Filtrage : catégorie + texte + (si mode "autour de moi") distance
     const filtered = useMemo(() => {
         let list = filter ? mapped.filter(l => l.category === filter) : mapped;
         if (searchText.trim()) {
@@ -168,7 +167,6 @@ function MapPage() {
         return list;
     }, [mapped, filter, searchText, nearActive, userPos, nearRadius]);
 
-    // Activer "autour de moi"
     const handleNearMe = useCallback(() => {
         if (!navigator.geolocation) return;
         setGeoLoading(true);
@@ -191,14 +189,12 @@ function MapPage() {
     const center = useMemo(() =>
         nearActive && userPos ? userPos :
             filtered.length > 0 ? filtered[0]._coords :
-                [7.54, -5.55],   // Côte d'Ivoire par défaut
+                [7.54, -5.55],
         [filtered, nearActive, userPos]
     );
 
     return (
         <div className="min-h-screen bg-gray-50 pt-16 flex relative">
-
-            {/* Bouton retour en arrière (mobile) */}
             <button
                 onClick={() => navigate(-1)}
                 className="md:hidden fixed top-20 left-4 z-[1001] w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors"
@@ -207,7 +203,6 @@ function MapPage() {
                 <ArrowLeft className="w-5 h-5 text-gray-700" />
             </button>
 
-            {/* Bouton toggle sidebar - Desktop uniquement */}
             <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 className={`hidden md:flex fixed top-1/2 -translate-y-1/2 z-[1001] w-10 h-16 bg-white rounded-r-lg shadow-lg items-center justify-center hover:bg-gray-50 transition-all ${
@@ -222,15 +217,10 @@ function MapPage() {
                 )}
             </button>
 
-            {/* ── Sidebar Desktop ── */}
             <div className={`hidden md:flex fixed left-0 top-16 bottom-0 w-80 bg-white shadow-lg z-[1000] flex-col transition-transform duration-300 ${
                 sidebarOpen ? 'translate-x-0' : '-translate-x-full'
             }`}>
-
-                {/* Header + Search */}
                 <div className="p-4 border-b border-gray-200 flex-shrink-0 space-y-3">
-
-                    {/* Barre de recherche */}
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input
@@ -242,7 +232,6 @@ function MapPage() {
                         />
                     </div>
 
-                    {/* Bouton "Autour de moi" */}
                     {!nearActive ? (
                         <button
                             onClick={handleNearMe}
@@ -254,7 +243,6 @@ function MapPage() {
                         </button>
                     ) : (
                         <div className="flex flex-col gap-2">
-                            {/* Rayon */}
                             <div className="flex items-center gap-2">
                                 <Navigation className="w-4 h-4 text-orange-500 flex-shrink-0" />
                                 <span className="text-xs text-gray-600 flex-1">Rayon : <strong>{nearRadius} km</strong></span>
@@ -274,7 +262,6 @@ function MapPage() {
                         </div>
                     )}
 
-                    {/* Filtres catégorie */}
                     <div className="flex gap-2 flex-wrap">
                         {[
                             { val: '', label: 'Tout', icon: null },
@@ -304,7 +291,6 @@ function MapPage() {
                     </p>
                 </div>
 
-                {/* Liste Desktop */}
                 <div className="flex-1 overflow-y-auto">
                     {isLoading ? (
                         <div className="flex items-center justify-center h-32">
@@ -352,7 +338,7 @@ function MapPage() {
                                                 {listing.city || 'Ville inconnue'}
                                                 {dist !== null && (
                                                     <span className="ml-1 text-orange-500 font-semibold">
-                                                        · {dist < 1 ? '< 1' : Math.round(dist)} km
+                                                        · {dist < 1 ? 'moins de 1' : Math.round(dist)} km
                                                     </span>
                                                 )}
                                             </p>
@@ -368,10 +354,9 @@ function MapPage() {
                 </div>
             </div>
 
-            {/* ── Barre de recherche Mobile (en haut de la carte) ── */}
+
             <div className="md:hidden fixed top-16 left-0 right-0 z-[999] p-3 bg-white border-b border-gray-200 shadow-sm">
                 <div className="flex gap-2">
-                    {/* Recherche */}
                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input
@@ -382,7 +367,6 @@ function MapPage() {
                             className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-orange-500"
                         />
                     </div>
-                    {/* Bouton Autour de moi */}
                     <button
                         onClick={nearActive ? cancelNearMe : handleNearMe}
                         disabled={geoLoading}
@@ -397,7 +381,6 @@ function MapPage() {
                     </button>
                 </div>
 
-                {/* Filtres catégorie mobile */}
                 <div className="flex gap-2 mt-2 overflow-x-auto scrollbar-hide">
                     {[
                         { val: '', label: 'Tout' },
@@ -420,7 +403,6 @@ function MapPage() {
                 </div>
             </div>
 
-            {/* ── Liste Mobile (drawer en bas) ── */}
             <div className="md:hidden fixed bottom-0 left-0 right-0 z-[999] bg-white rounded-t-2xl shadow-2xl max-h-[40vh] overflow-hidden">
                 <div className="p-3 border-b border-gray-200 flex items-center justify-between">
                     <p className="text-sm font-medium text-gray-700">
@@ -462,7 +444,7 @@ function MapPage() {
                                             </p>
                                             {dist !== null && (
                                                 <p className="text-xs text-orange-500 font-semibold mt-1">
-                                                    📍 {dist < 1 ? '< 1' : Math.round(dist)} km
+                                                    📍 {dist < 1 ? 'moins de 1' : Math.round(dist)} km
                                                 </p>
                                             )}
                                             <p className="text-orange-500 font-bold text-sm mt-2">
@@ -477,7 +459,6 @@ function MapPage() {
                 </div>
             </div>
 
-            {/* ── Carte ── */}
             <div className={`flex-1 transition-all duration-300 ${
                 sidebarOpen ? 'md:ml-80' : 'md:ml-0'
             }`} style={{ height: 'calc(100vh - 64px)', marginTop: '48px' }}>
@@ -492,11 +473,9 @@ function MapPage() {
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
 
-                    {/* Recentrage automatique */}
                     {nearActive && userPos && <FlyTo coords={userPos} zoom={nearRadius < 30 ? 13 : nearRadius < 100 ? 11 : 9} />}
                     {!nearActive && selected?._coords && <FlyTo coords={selected._coords} zoom={13} />}
 
-                    {/* Cercle de rayon "autour de moi" */}
                     {nearActive && userPos && (
                         <Circle
                             center={userPos}
@@ -505,233 +484,12 @@ function MapPage() {
                         />
                     )}
 
-                    {/* Marqueur position utilisateur */}
                     {userPos && (
                         <Marker position={userPos} icon={ME_ICON}>
                             <Popup><strong>Vous êtes ici</strong></Popup>
                         </Marker>
                     )}
 
-                    {/* Marqueurs annonces */}
-                    {filtered.map(listing => (
-                        <Marker
-                            key={listing.id}
-                            position={listing._coords}
-                            icon={makeIcon(listing.category, listing.subcategory, selected?.id === listing.id)}
-                            eventHandlers={{ click: () => setSelected(listing) }}
-                        >
-                            <Popup>
-                                <div style={{ minWidth: 200 }}>
-                                    <img
-                                        src={getImageUrl(listing.mainImage) || '/placeholder.jpg'}
-                                        alt={listing.title}
-                                        style={{ width: '100%', height: 100, objectFit: 'cover', borderRadius: 6, marginBottom: 8 }}
-                                    />
-                                    <p style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>{listing.title}</p>
-                                    <p style={{ color: '#f97316', fontWeight: 700 }}>{formatPrice(listing.price)} FCFA</p>
-                                    <p style={{ color: '#6b7280', fontSize: 12, marginTop: 2 }}>{listing.city}</p>
-                                    {nearActive && userPos && (
-                                        <p style={{ color: '#f97316', fontSize: 11, marginTop: 2 }}>
-                                            📍 {Math.round(haversine(userPos, listing._coords))} km de vous
-                                        </p>
-                                    )}
-                                    <Link
-                                        to={`/listing/${listing.id}`}
-                                        style={{
-                                            display: 'block', marginTop: 10, background: '#f97316', color: 'white',
-                                            textAlign: 'center', padding: '6px 0', borderRadius: 6, fontSize: 13,
-                                            fontWeight: 600, textDecoration: 'none'
-                                        }}
-                                    >
-                                        Voir l'annonce →
-                                    </Link>
-                                </div>
-                            </Popup>
-                        </Marker>
-                    ))}
-                </MapContainer>
-            </div>
-        </div>
-    );
-}
-
-                {/* Header + Search */}
-                <div className="p-4 border-b border-gray-200 flex-shrink-0 space-y-3">
-
-                    {/* Barre de recherche */}
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        <input
-                            type="text"
-                            placeholder="Rechercher sur la carte..."
-                            value={searchText}
-                            onChange={e => setSearchText(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-orange-500"
-                        />
-                    </div>
-
-                    {/* Bouton "Autour de moi" */}
-                    {!nearActive ? (
-                        <button
-                            onClick={handleNearMe}
-                            disabled={geoLoading}
-                            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-sm transition-all bg-orange-500 hover:bg-orange-600 text-white shadow disabled:opacity-60"
-                        >
-                            <Navigation className="w-4 h-4" />
-                            {geoLoading ? 'Localisation…' : 'Autour de moi'}
-                        </button>
-                    ) : (
-                        <div className="flex flex-col gap-2">
-                            {/* Rayon */}
-                            <div className="flex items-center gap-2">
-                                <Navigation className="w-4 h-4 text-orange-500 flex-shrink-0" />
-                                <span className="text-xs text-gray-600 flex-1">Rayon : <strong>{nearRadius} km</strong></span>
-                                <button onClick={cancelNearMe} className="text-gray-400 hover:text-red-500">
-                                    <X className="w-4 h-4" />
-                                </button>
-                            </div>
-                            <input
-                                type="range" min={5} max={500} step={5}
-                                value={nearRadius}
-                                onChange={e => setNearRadius(Number(e.target.value))}
-                                className="w-full accent-orange-500"
-                            />
-                            <div className="flex justify-between text-xs text-gray-400">
-                                <span>5 km</span><span>500 km</span>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Filtres catégorie */}
-                    <div className="flex gap-2 flex-wrap">
-                        {[
-                            { val: '', label: 'Tout', icon: null },
-                            { val: 'immobilier', label: 'Immo', icon: Home },
-                            { val: 'vacance', label: 'Vacances', icon: Building2 },
-                            { val: 'vehicule', label: 'Véhicules', icon: Car },
-                        ].map(({ val, label, icon: Icon }) => (
-                            <button
-                                key={val}
-                                onClick={() => setFilter(val)}
-                                className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${filter === val
-                                        ? 'bg-orange-500 text-white'
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                    }`}
-                            >
-                                {Icon && <Icon className="w-3 h-3" />}{label}
-                            </button>
-                        ))}
-                    </div>
-
-                    <p className="text-xs text-gray-400">
-                        {isLoading ? 'Chargement…' : (
-                            nearActive
-                                ? `${filtered.length} annonce${filtered.length !== 1 ? 's' : ''} dans un rayon de ${nearRadius} km`
-                                : `${filtered.length} annonce${filtered.length !== 1 ? 's' : ''} sur la carte`
-                        )}
-                    </p>
-                </div>
-
-                {/* Liste */}
-                <div className="flex-1 overflow-y-auto">
-                    {isLoading ? (
-                        <div className="flex items-center justify-center h-32">
-                            <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
-                        </div>
-                    ) : filtered.length === 0 ? (
-                        <div className="text-center py-12 px-4">
-                            <MapPin className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                            <p className="text-gray-500 text-sm">
-                                {nearActive
-                                    ? `Aucune annonce à moins de ${nearRadius} km de vous`
-                                    : 'Aucune annonce trouvée'}
-                            </p>
-                            {nearActive && (
-                                <button
-                                    onClick={() => setNearRadius(r => Math.min(r + 50, 500))}
-                                    className="mt-3 text-xs text-orange-600 underline"
-                                >
-                                    Élargir le rayon
-                                </button>
-                            )}
-                        </div>
-                    ) : (
-                        filtered.map(listing => {
-                            const dist = nearActive && userPos
-                                ? haversine(userPos, listing._coords)
-                                : null;
-                            return (
-                                <button
-                                    key={listing.id}
-                                    onClick={() => setSelected(listing)}
-                                    className={`w-full p-4 border-b border-gray-100 text-left transition-colors hover:bg-orange-50 ${selected?.id === listing.id ? 'bg-orange-50 border-l-4 border-l-orange-500' : ''
-                                        }`}
-                                >
-                                    <div className="flex gap-3">
-                                        <img
-                                            src={getImageUrl(listing.mainImage || listing.images?.[0]?.url) || '/placeholder.jpg'}
-                                            alt={listing.title}
-                                            className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
-                                        />
-                                        <div className="flex-1 min-w-0">
-                                            <p className="font-medium text-gray-900 text-sm truncate">{listing.title}</p>
-                                            <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
-                                                <MapPin className="w-3 h-3" />
-                                                {listing.city || 'Ville inconnue'}
-                                                {dist !== null && (
-                                                    <span className="ml-1 text-orange-500 font-semibold">
-                                                        · {dist < 1 ? '< 1' : Math.round(dist)} km
-                                                    </span>
-                                                )}
-                                            </p>
-                                            <p className="text-orange-500 font-bold text-sm mt-0.5">
-                                                {formatPrice(listing.price)} FCFA
-                                            </p>
-                                        </div>
-                                    </div>
-                                </button>
-                            );
-                        })
-                    )}
-                </div>
-            </div>
-
-            {/* ── Carte ── */}
-            <div className={`flex-1 h-[calc(100vh-64px)] transition-all duration-300 ${
-                sidebarOpen ? 'ml-80' : 'ml-0'
-            }`}>
-                <MapContainer
-                    center={center}
-                    zoom={nearActive ? 11 : 7}
-                    style={{ width: '100%', height: '100%' }}
-                    scrollWheelZoom
-                >
-                    <TileLayer
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    />
-
-                    {/* Recentrage automatique */}
-                    {nearActive && userPos && <FlyTo coords={userPos} zoom={nearRadius < 30 ? 13 : nearRadius < 100 ? 11 : 9} />}
-                    {!nearActive && selected?._coords && <FlyTo coords={selected._coords} zoom={13} />}
-
-                    {/* Cercle de rayon "autour de moi" */}
-                    {nearActive && userPos && (
-                        <Circle
-                            center={userPos}
-                            radius={nearRadius * 1000}
-                            pathOptions={{ color: '#f97316', fillColor: '#f97316', fillOpacity: 0.08, weight: 2, dashArray: '6 4' }}
-                        />
-                    )}
-
-                    {/* Marqueur position utilisateur */}
-                    {userPos && (
-                        <Marker position={userPos} icon={ME_ICON}>
-                            <Popup><strong>Vous êtes ici</strong></Popup>
-                        </Marker>
-                    )}
-
-                    {/* Marqueurs annonces */}
                     {filtered.map(listing => (
                         <Marker
                             key={listing.id}
